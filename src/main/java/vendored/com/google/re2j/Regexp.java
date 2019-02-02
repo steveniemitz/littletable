@@ -59,7 +59,7 @@ class Regexp {
   String name; // capturing name, for CAPTURE
   // Do update copy ctor when adding new fields!
 
-  Regexp(Op op) {
+  Regexp(Regexp.Op op) {
     this.op = op;
   }
 

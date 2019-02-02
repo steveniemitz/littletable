@@ -1,6 +1,18 @@
-name := "littletable"
+inThisBuild(List(
+  organization := "com.steveniemitz",
+  homepage := Some(url("https://github.com/steveniemitz/littletable")),
+  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  developers := List(
+    Developer(
+      "steveniemitz",
+      "Steve Niemitz",
+      "steveniemitz@gmail.com",
+      url("http://steveniemitz.com")
+    )
+  )
+))
 
-version := "1.0.0"
+name := "littletable"
 
 crossScalaVersions := Seq("2.11.11", "2.12.8")
 
