@@ -1,5 +1,8 @@
 # LittleTable
 
+## Status
+[![Build Status](https://travis-ci.org/steveniemitz/littletable.svg?branch=master)](https://travis-ci.org/steveniemitz/littletable)
+
 ## Overview
 
 LittleTable is an emulator for Google's Bigtable intended to 
