@@ -2,17 +2,18 @@
 
 ## Status
 [![Build Status](https://travis-ci.org/steveniemitz/littletable.svg?branch=master)](https://travis-ci.org/steveniemitz/littletable)
+[![Maven Version](https://maven-badges.herokuapp.com/maven-central/com.steveniemitz/littletable/badge.svg)](http://search.maven.org/#search|gav|1|g:"com.steveniemitz")
 
 ## Overview
 
-LittleTable is an emulator for Google's Bigtable intended to 
-replace the emulator distributed with the `gcloud` utility.
+LittleTable is an emulator for Google [Cloud Bigtable](https://cloud.google.com/bigtable/) intended 
+to replace the emulator distributed with the `gcloud` utility.
 
 It aims to provide full compatibility with the Cloud Bigtable API,
 and fill the gaps left by the go based emulator, including support 
 for matching binary data with RE2 regexes and the `sink` filter.
 
-## Getting the libraries
+## Getting the emulator
 
 Maven:
 ```
@@ -32,6 +33,14 @@ sbt:
 ```
 libraryDependencies += "com.steveniemitz" %% "littletable" % "1.0.0"
 ```
+
+### Other Dependencies
+
+LittleTable assumes you'll "bring your own" dependencies for gRPC as well as [bigtable-client-core](https://mvnrepository.com/artifact/com.google.cloud.bigtable/bigtable-client-core).
+By default `bigtable-client-core` will also include the required gRPC dependencies, so adding a
+dependency to that is all that's required.
+
+See build.sbt for reasonable defaults.
 
 ## Usage
  
