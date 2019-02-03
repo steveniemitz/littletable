@@ -4,7 +4,6 @@ import com.google.bigtable.v2.Mutation.MutationCase
 import com.google.bigtable.v2._
 import com.google.rpc.Code
 import com.google.protobuf.{ByteString, BytesValue, StringValue}
-import com.twitter.util.Time
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.util.concurrent.ConcurrentHashMap
@@ -65,7 +64,7 @@ final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
           case MutationCase.SET_CELL =>
             val sc = m.getSetCell
             val ts =
-              if (sc.getTimestampMicros == -1) Time.now.inMicroseconds
+              if (sc.getTimestampMicros == -1) Time.now * 1000 // millis -> micros
               else sc.getTimestampMicros
             val cell = Cell(sc.getFamilyName, sc.getColumnQualifier, ts, sc.getValue)
             row.setCell(cell)

@@ -3,7 +3,6 @@ package com.steveniemitz.littletable
 import com.google.bigtable.v2.{MutateRowRequest, ReadRowsRequest}
 import com.google.cloud.bigtable.grpc.scanner.FlatRow
 import com.google.protobuf.ByteString
-import com.twitter.util.Time
 
 class MutateRowsTests extends BigtableTestSuite {
   private def readRow(key: ByteString): Option[FlatRow] = {
@@ -87,7 +86,7 @@ class MutateRowsTests extends BigtableTestSuite {
       .setTimestampMicros(-1)
 
     val now = Time.now
-    Time.withTimeAt(now) { _ =>
+    Time.withTimeAt(now) {
       dataClient.mutateRow(req.build())
     }
 
@@ -98,7 +97,7 @@ class MutateRowsTests extends BigtableTestSuite {
     row should be(
       FlatRow.newBuilder()
         .withRowKey(key)
-        .addCell("f1", bs"cq1", now.inMicroseconds, bs"value1")
+        .addCell("f1", bs"cq1", now * 1000, bs"value1")
         .build()
     )
   }
