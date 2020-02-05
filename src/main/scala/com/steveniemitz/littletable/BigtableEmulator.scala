@@ -29,6 +29,7 @@ final class BigtableEmulator private(
       .setUserAgent("derp")
       .enableEmulator("localhost", 12345)
 
+    System.setProperty("BIGTABLE_SESSION_SKIP_WARMUP", "true")
     if (inProcessServer.isDefined) {
       new InProcessBigtableSession(bigtableOptions.build(), inProcessServer.get._1)
     } else if (tcpServer.isDefined) {
