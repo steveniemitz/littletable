@@ -23,10 +23,24 @@ private object ResultRow {
     def transact[T](fn: Self => T): T = fn(this)
   }
 
+  private final class ReiterableRow(val key: ByteString, cellIterable: Iterable[Cell]) extends Row {
+    override protected type Self = ReiterableRow
+
+    override def cells: Iterator[Cell] = cellIterable.iterator
+
+    override def hasCells: Boolean = cellIterable.nonEmpty
+
+    override def transact[T](fn: ReiterableRow => T): T = fn(this)
+  }
+
   def empty(key: ByteString): Row = EmptyRow(key)
 
   def create(key: ByteString, cells: Iterator[Cell]): Row = {
     new ResultRow(key, cells)
+  }
+
+  def reiterable(key: ByteString, cells: Iterable[Cell]): Row = {
+    new ReiterableRow(key, cells)
   }
 
   def createFromUnsortedCells(key: ByteString, cells: Iterator[Cell]): Row = {
@@ -62,9 +76,7 @@ private final class ResultRow private (val key: ByteString, val cells: Iterator[
 private object MutableRow {
   def create(key: ByteString, cells: Iterator[Cell] = Iterator.empty): MutableRow = {
     val r = new MutableRow(key)
-    r.transact { r =>
-      cells.foreach(c => r.setCell(c))
-    }
+    r.transact { r => cells.foreach(c => r.setCell(c)) }
     r
   }
 }

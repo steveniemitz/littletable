@@ -86,25 +86,22 @@ private object FilterEvaluator {
     val chain = filter.getChain
     val filterFns = chain.getFiltersList.asScala.map(prepare)
 
-    row =>
-      filterFns.foldLeft(row) { (r, fn) =>
-        fn(r)
-      }
+    row => filterFns.foldLeft(row) { (r, fn) => fn(r) }
   }
 
   private def prepareRowInterleave(filter: RowFilter): Row => Row = {
     val interleave = filter.getInterleave
     val filterFns = interleave.getFiltersList.asScala.map(prepare)
 
-    row =>
-      {
-        val newRows = filterFns.map(_.apply(row))
-        val newCells = newRows.iterator.flatMap { r =>
-          r.transact { _.cells }
-        }
+    row => {
+      val cellBuffer = row.transact(_.cells.toBuffer)
+      val reiterableRow = ResultRow.reiterable(row.key, cellBuffer)
 
-        ResultRow.createFromUnsortedCells(row.key, newCells)
-      }
+      val newRows = filterFns.map(_.apply(reiterableRow))
+      val newCells = newRows.iterator.flatMap { r => r.transact { _.cells } }
+
+      ResultRow.createFromUnsortedCells(row.key, newCells)
+    }
   }
 
   private def prepareColumnRangeFilter(filter: RowFilter): Row => Row = {
@@ -145,17 +142,16 @@ private object FilterEvaluator {
       if (cond.getFalseFilter.getFilterCase == RowFilter.FilterCase.FILTER_NOT_SET) dropF
       else prepare(cond.getFalseFilter)
 
-    row =>
-      {
-        row.transact { row =>
-          val predicateResult = evaluate(row, preparedPredicate)
-          if (predicateResult.isDefined) {
-            evaluate(row, preparedTrue).getOrElse(ResultRow.empty(row.key))
-          } else {
-            evaluate(row, preparedFalse).getOrElse(ResultRow.empty(row.key))
-          }
+    row => {
+      row.transact { row =>
+        val predicateResult = evaluate(row, preparedPredicate)
+        if (predicateResult.isDefined) {
+          evaluate(row, preparedTrue).getOrElse(ResultRow.empty(row.key))
+        } else {
+          evaluate(row, preparedFalse).getOrElse(ResultRow.empty(row.key))
         }
       }
+    }
   }
 
   private def prepareValueRangeFilter(filter: RowFilter): Row => Row = {
@@ -203,58 +199,52 @@ private object FilterEvaluator {
   private def preparePerColumnLimitFilter(filter: RowFilter): Row => Row = {
     val limit = filter.getCellsPerColumnLimitFilter
 
-    row =>
-      {
-        val newCells = row.transact { r =>
-          GroupByLimitIterator(r.cells, limit) { (a, b) =>
-            a.columnQualifier == b.columnQualifier && a.columnFamily == b.columnFamily
-          }
+    row => {
+      val newCells = row.transact { r =>
+        GroupByLimitIterator(r.cells, limit) { (a, b) =>
+          a.columnQualifier == b.columnQualifier && a.columnFamily == b.columnFamily
         }
-
-        ResultRow.create(row.key, newCells.flatten)
       }
+
+      ResultRow.create(row.key, newCells.flatten)
+    }
   }
 
   private def prepareCellsPerRowLimitFilter(filter: RowFilter): Row => Row = {
     val limit = filter.getCellsPerRowLimitFilter
 
-    row =>
-      {
-        val newCells = row.transact {
-          _.cells.take(limit)
-        }
-        ResultRow.create(row.key, newCells)
+    row => {
+      val newCells = row.transact {
+        _.cells.take(limit)
       }
+      ResultRow.create(row.key, newCells)
+    }
   }
 
   private def prepareCellsPerRowOffsetFilter(filter: RowFilter): Row => Row = {
     val offset = filter.getCellsPerRowOffsetFilter
 
-    row =>
-      {
-        val newCells = row.transact {
-          _.cells.drop(offset)
-        }
-        ResultRow.create(row.key, newCells)
+    row => {
+      val newCells = row.transact {
+        _.cells.drop(offset)
       }
+      ResultRow.create(row.key, newCells)
+    }
   }
 
   private def prepareRowSampleFilter(filter: RowFilter): Row => Row = {
     val probability = filter.getRowSampleFilter
 
-    row =>
-      {
-        if (ThreadLocalRandom.current().nextDouble() < probability) row
-        else ResultRow.empty(row.key)
-      }
+    row => {
+      if (ThreadLocalRandom.current().nextDouble() < probability) row
+      else ResultRow.empty(row.key)
+    }
   }
 
   private def prepareColumnQualifierRegexFilter(filter: RowFilter): Row => Row = {
     val regex = RE2.compileBinary(filter.getColumnQualifierRegexFilter.toByteArray)
 
-    simpleCellFilter { c =>
-      regex.matchBinary(c.columnQualifier.toByteArray)
-    }
+    simpleCellFilter { c => regex.matchBinary(c.columnQualifier.toByteArray) }
   }
 
   private def prepareFamilyNameRegexFilter(filter: RowFilter): Row => Row = {
@@ -268,25 +258,22 @@ private object FilterEvaluator {
   private def prepareValueRegexFilter(filter: RowFilter): Row => Row = {
     val regex = RE2.compileBinary(filter.getValueRegexFilter.toByteArray)
 
-    simpleCellFilter { c =>
-      regex.matchBinary(c.value.toByteArray)
-    }
+    simpleCellFilter { c => regex.matchBinary(c.value.toByteArray) }
   }
 
   private def prepareApplyLabelTransformer(filter: RowFilter): Row => Row = {
     val label = filter.getApplyLabelTransformer
 
-    row =>
-      {
-        val newCells = row.transact { r =>
-          r.cells.map { c =>
-            val newCell = c.copy(labels = c.labels + label)
-            newCell.value = c.value
-            newCell
-          }
+    row => {
+      val newCells = row.transact { r =>
+        r.cells.map { c =>
+          val newCell = c.copy(labels = c.labels + label)
+          newCell.value = c.value
+          newCell
         }
-        ResultRow.create(row.key, newCells)
       }
+      ResultRow.create(row.key, newCells)
+    }
   }
 
   private def prepareSink(filter: RowFilter): Row => Row = row => throw SinkReturn(row)
