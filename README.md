@@ -1,8 +1,7 @@
 # LittleTable
 
-## Status
 [![Build Status](https://travis-ci.org/steveniemitz/littletable.svg?branch=master)](https://travis-ci.org/steveniemitz/littletable)
-[![Maven Version](https://maven-badges.herokuapp.com/maven-central/com.steveniemitz/littletable/badge.svg)](http://search.maven.org/#search|gav|1|g:"com.steveniemitz")
+[![Maven Version](https://img.shields.io/maven-central/v/com.steveniemitz/littletable_2.12?label=littletable_2.12)](http://search.maven.org/#search|gav|1|g:"com.steveniemitz")
 
 ## Overview
 
