@@ -1,8 +1,10 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-package vendored.com.google.re2j;
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
+package com.steveniemitz.binaryre2j;
 
 /**
  * An exception thrown by the parser if the pattern was invalid.

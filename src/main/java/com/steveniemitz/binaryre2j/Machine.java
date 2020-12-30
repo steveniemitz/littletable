@@ -1,11 +1,13 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/exec.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 import java.util.Arrays;
 
@@ -13,7 +15,6 @@ import java.util.Arrays;
 // RE2 instance using a simple NFA.
 //
 // Called by RE2.doExecute.
-// CHECKSTYLE:OFF |*
 class Machine {
 
   // A logical thread in the NFA.
@@ -230,9 +231,7 @@ class Machine {
           // Have match; finished exploring alternatives.
           break;
         }
-        if ((re2.prefixBytes != null && re2.prefixBytes.length > 0 && rune1 != re2.prefixByte && in.canCheckPrefix())
-          || (re2.prefix != null && !re2.prefix.isEmpty() && rune1 != re2.prefixByte && in.canCheckPrefix())
-        ) {
+        if (re2.prefix.length > 0 && rune1 != re2.prefix[0] && in.canCheckPrefix()) {
           // Match requires literal prefix; fast search for it.
           int advance = in.index(re2, pos);
           if (advance < 0) {
@@ -255,8 +254,9 @@ class Machine {
         }
         add(runq, prog.start, pos, matchcap, flag, null);
       }
-      flag = Utils.emptyOpContext(rune, rune1);
-      step(runq, nextq, pos, pos + width, rune, flag, anchor, pos == in.endPos());
+      int nextPos = pos + width;
+      flag = in.context(nextPos);
+      step(runq, nextq, pos, nextPos, rune, flag, anchor, pos == in.endPos());
       if (width == 0) { // EOF
         break;
       }

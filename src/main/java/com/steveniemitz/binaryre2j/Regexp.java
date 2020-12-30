@@ -1,20 +1,22 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/regexp.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Regular expression abstract syntax tree. Produced by parser, used by compiler. NB, this
  * corresponds to {@code syntax.regexp} in the Go implementation; Go's {@code regexp} is called
  * {@code RE2} in Java.
  */
-// CHECKSTYLE:OFF |*
 class Regexp {
 
   enum Op {
@@ -57,6 +59,7 @@ class Regexp {
   int min, max; // min, max for REPEAT
   int cap; // capturing index, for CAPTURE
   String name; // capturing name, for CAPTURE
+  Map<String, Integer> namedGroups; // map of group name -> capturing index
   // Do update copy ctor when adding new fields!
 
   Regexp(Regexp.Op op) {
@@ -73,6 +76,7 @@ class Regexp {
     this.max = that.max;
     this.cap = that.cap;
     this.name = that.name;
+    this.namedGroups = that.namedGroups;
   }
 
   void reinit() {

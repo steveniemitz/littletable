@@ -1,15 +1,16 @@
-// Copyright 2011 The Go Authors.  All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/simplify.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 import java.util.ArrayList;
 
-// CHECKSTYLE:OFF |*
 class Simplify {
 
   // Simplify returns a regexp equivalent to re but without counted

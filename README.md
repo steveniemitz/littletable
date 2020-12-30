@@ -18,7 +18,7 @@ Maven:
 <dependency>
   <groupId>com.steveniemitz</groupId>
   <artifactId>littletable_2.12</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 

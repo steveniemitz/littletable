@@ -14,6 +14,9 @@ private[littletable] trait BigtableTestSuite extends FunTestSuite with Inspector
     def bs(args: Any*): ByteString = ByteString.copyFromUtf8(sc.s(args: _*))
   }
 
+  protected def bs(chars: Char*): ByteString =
+    ByteString.copyFrom(chars.map(_.toByte).toArray)
+
   private var server: Server = _
   private var dataService: BigtableDataService = _
   private var tableAdminService: BigtableAdminService = _

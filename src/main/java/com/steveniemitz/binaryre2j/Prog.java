@@ -1,18 +1,20 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/prog.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 /**
  * A Prog is a compiled regular expression program.
  */
-// CHECKSTYLE:OFF |*
 final class Prog {
 
   Inst[] inst = new Inst[10];
@@ -59,7 +61,7 @@ final class Prog {
   // prefix() returns a pair of a literal string that all matches for the
   // regexp must start with, and a boolean which is true if the prefix is the
   // entire match.  The string is returned by appending to |prefix|.
-  boolean prefix(StringBuilder prefix) {
+  boolean prefix(ByteArrayOutputStream prefix) {
     Inst i = skipNop(start);
 
     // Avoid allocation of buffer if prefix is empty.
@@ -68,30 +70,11 @@ final class Prog {
     }
 
     // Have prefix; gather characters.
-    while (Inst.isRuneOp(i.op) && i.runes.length == 1 && (i.arg & RE2.FOLD_CASE) == 0) {
-      prefix.appendCodePoint(i.runes[0]); // an int, not a byte.
+    while (Inst.isRuneOp(i.op) && i.runes.length == 1 && i.runes[0] <= 0xFF && (i.arg & RE2.FOLD_CASE) == 0) {
+      prefix.write(i.runes[0]); // an int, not a byte.
       i = skipNop(i.out);
     }
     return i.op == Inst.MATCH;
-  }
-
-  byte[] binaryPrefix() {
-    Inst i = skipNop(start);
-
-    // Avoid allocation of buffer if prefix is empty.
-    if (!Inst.isRuneOp(i.op) || i.runes.length != 1) {
-      return new byte[0]; // (append "" to prefix)
-    }
-
-    byte[] tmp = new byte[inst.length];
-    int idx = 0;
-    // Have prefix; gather characters.
-    while (Inst.isRuneOp(i.op) && i.runes.length == 1 && (i.arg & RE2.FOLD_CASE) == 0) {
-      tmp[idx++] = (byte)(i.runes[0] & 0xFF); // an int, not a byte.
-      i = skipNop(i.out);
-    }
-
-    return Arrays.copyOf(tmp, idx);
   }
 
   // startCond() returns the leading empty-width conditions that must be true

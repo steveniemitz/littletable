@@ -27,18 +27,18 @@ class ReadRowsTests extends BigtableTestSuite {
     rows.get(0) should be(expected)
   }
 
-  private def insertRows(): Unit = {
-    def cell(family: String, qualifier: ByteString, timestamp: Long, value: ByteString): Mutation = {
-      val mut = Mutation.newBuilder()
-      mut
-        .getSetCellBuilder
-        .setFamilyName(family)
-        .setColumnQualifier(qualifier)
-        .setTimestampMicros(timestamp)
-        .setValue(value)
-      mut.build()
-    }
+  private def cell(family: String, qualifier: ByteString, timestamp: Long, value: ByteString): Mutation = {
+    val mut = Mutation.newBuilder()
+    mut
+      .getSetCellBuilder
+      .setFamilyName(family)
+      .setColumnQualifier(qualifier)
+      .setTimestampMicros(timestamp)
+      .setValue(value)
+    mut.build()
+  }
 
+  private def insertRows(): Unit = {
     val req = MutateRowsRequest.newBuilder()
         .setTableName(TestTableName)
     req.addEntriesBuilder()
@@ -95,10 +95,22 @@ class ReadRowsTests extends BigtableTestSuite {
   test("readRows - row key regex") {
     insertRows()
 
+    val binaryRowKey = bs('t', 'e', 's', 't', 0xff, 0xff, 'w', '1')
+    val insertReq = MutateRowsRequest.newBuilder()
+      .setTableName(TestTableName)
+
+    insertReq.addEntriesBuilder()
+      .setRowKey(binaryRowKey)
+      .addMutations(cell("f1", bs"cq1", 4000, bs"value100"))
+      .addMutations(cell("f1", bs"cq2", 4000, bs"value200"))
+      .addMutations(cell("f2", bs"cq3", 4000, bs"value300"))
+
+    dataClient.mutateRows(insertReq.build())
+
     val req = ReadRowsRequest
       .newBuilder()
       .setTableName(TestTableName)
-    req.getFilterBuilder.setRowKeyRegexFilter(bs"test\\Cow[1-2]")
+    req.getFilterBuilder.setRowKeyRegexFilter(bs"test\\C{2}w[1-2]")
 
     val rows = dataClient.readFlatRowsList(req.build())
     val expected1 = FlatRow
@@ -115,8 +127,14 @@ class ReadRowsTests extends BigtableTestSuite {
       .addCell("f1", bs"cq2", 2000, bs"value20")
       .addCell("f2", bs"cq3", 2000, bs"value30")
       .build()
-
-    rows should contain theSameElementsAs Seq(expected1, expected2)
+    val expected3 = FlatRow
+      .newBuilder()
+      .withRowKey(binaryRowKey)
+      .addCell("f1", bs"cq1", 4000, bs"value100")
+      .addCell("f1", bs"cq2", 4000, bs"value200")
+      .addCell("f2", bs"cq3", 4000, bs"value300")
+      .build()
+    rows should contain theSameElementsAs Seq(expected1, expected2, expected3)
   }
 
   test("readRows - column range filter") {

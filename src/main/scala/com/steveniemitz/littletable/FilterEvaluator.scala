@@ -4,7 +4,7 @@ import com.google.bigtable.v2.{ColumnRange, RowFilter, ValueRange}
 import com.google.protobuf.ByteString
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom
-import vendored.com.google.re2j.RE2
+import com.steveniemitz.binaryre2j.RE2
 import scala.collection.JavaConverters._
 import scala.util.control.ControlThrowable
 
@@ -75,7 +75,7 @@ private object FilterEvaluator {
 
   private def prepareRowKeyRegexFilter(filter: RowFilter): Row => Row = {
     val regex = filter.getRowKeyRegexFilter
-    val re2 = RE2.compileBinary(regex.toByteArray)
+    val re2 = RE2.compile(regex.toByteArray)
 
     row =>
       if (re2.matchBinary(row.key.toByteArray)) row
@@ -242,13 +242,13 @@ private object FilterEvaluator {
   }
 
   private def prepareColumnQualifierRegexFilter(filter: RowFilter): Row => Row = {
-    val regex = RE2.compileBinary(filter.getColumnQualifierRegexFilter.toByteArray)
+    val regex = RE2.compile(filter.getColumnQualifierRegexFilter.toByteArray)
 
     simpleCellFilter { c => regex.matchBinary(c.columnQualifier.toByteArray) }
   }
 
   private def prepareFamilyNameRegexFilter(filter: RowFilter): Row => Row = {
-    val regex = RE2.compileBinary(filter.getFamilyNameRegexFilterBytes.toByteArray)
+    val regex = RE2.compile(filter.getFamilyNameRegexFilterBytes.toByteArray)
 
     simpleCellFilter { c =>
       regex.matchBinary(c.columnFamily.getBytes(StandardCharsets.ISO_8859_1))
@@ -256,7 +256,7 @@ private object FilterEvaluator {
   }
 
   private def prepareValueRegexFilter(filter: RowFilter): Row => Row = {
-    val regex = RE2.compileBinary(filter.getValueRegexFilter.toByteArray)
+    val regex = RE2.compile(filter.getValueRegexFilter.toByteArray)
 
     simpleCellFilter { c => regex.matchBinary(c.value.toByteArray) }
   }

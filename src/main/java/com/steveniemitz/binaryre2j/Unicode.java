@@ -1,18 +1,19 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Many of these were derived from the corresponding Go functions in
 // http://code.google.com/p/go/source/browse/src/pkg/unicode/letter.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 /**
  * Utilities for dealing with Unicode better than Java does.
  *
  * @author adonovan@google.com (Alan Donovan)
  */
-// CHECKSTYLE:OFF |*
 class Unicode {
 
   // The highest legal rune value.
@@ -76,23 +77,6 @@ class Unicode {
     return is(UnicodeTables.Upper, r);
   }
 
-  // isLower reports whether the rune is a lower case letter.
-  static boolean isLower(int r) {
-    // See comment in isGraphic.
-    if (r <= MAX_LATIN1) {
-      return Character.isLowerCase((char) r);
-    }
-    return is(UnicodeTables.Lower, r);
-  }
-
-  // isTitle reports whether the rune is a title case letter.
-  static boolean isTitle(int r) {
-    if (r <= MAX_LATIN1) {
-      return false;
-    }
-    return is(UnicodeTables.Title, r);
-  }
-
   // isPrint reports whether the rune is printable (Unicode L/M/N/P/S or ' ').
   static boolean isPrint(int r) {
     if (r <= MAX_LATIN1) {
@@ -124,18 +108,8 @@ class Unicode {
   //
   static int simpleFold(int r) {
     // Consult caseOrbit table for special cases.
-    int lo = 0;
-    int hi = UnicodeTables.CASE_ORBIT.length;
-    while (lo < hi) {
-      int m = lo + (hi - lo) / 2;
-      if (UnicodeTables.CASE_ORBIT[m][0] < r) {
-        lo = m + 1;
-      } else {
-        hi = m;
-      }
-    }
-    if (lo < UnicodeTables.CASE_ORBIT.length && UnicodeTables.CASE_ORBIT[lo][0] == r) {
-      return UnicodeTables.CASE_ORBIT[lo][1];
+    if (r < UnicodeTables.CASE_ORBIT.length && UnicodeTables.CASE_ORBIT[r] != 0) {
+      return UnicodeTables.CASE_ORBIT[r];
     }
 
     // No folding specified.  This is a one- or two-element

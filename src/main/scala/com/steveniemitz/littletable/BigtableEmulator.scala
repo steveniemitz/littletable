@@ -5,6 +5,7 @@ import com.google.cloud.bigtable.grpc.BigtableSession
 import io.grpc.{Server, ServerBuilder}
 import io.grpc.inprocess.InProcessServerBuilder
 import java.util.concurrent.ConcurrentHashMap
+import scala.collection.mutable
 
 /**
  * An emulator that provides one or more gRPC servers.
@@ -14,6 +15,8 @@ final class BigtableEmulator private(
   tcpServer: Option[Server]
 ) {
   val servers: Seq[Server] = Seq(inProcessServer.map(_._2), tcpServer).flatten
+
+  private final val serversToStart = mutable.Queue[Server](servers: _*)
 
   /**
    * A [[BigtableSession]] that is configured to use the emulator service.  If the emulator was
@@ -33,6 +36,9 @@ final class BigtableEmulator private(
     if (inProcessServer.isDefined) {
       new InProcessBigtableSession(bigtableOptions.build(), inProcessServer.get._1)
     } else if (tcpServer.isDefined) {
+      serversToStart.dequeueFirst(_.eq(tcpServer.get))
+      tcpServer.get.start()
+
       bigtableOptions.setPort(tcpServer.get.getPort)
       new BigtableSession(bigtableOptions.build())
     } else {
@@ -40,7 +46,7 @@ final class BigtableEmulator private(
     }
   }
 
-  def start(): Unit = servers.foreach(_.start())
+  def start(): Unit = serversToStart.dequeueAll(_ => true).foreach(_.start())
 
   def shutdown(): Unit = {
     servers.foreach(_.shutdownNow())

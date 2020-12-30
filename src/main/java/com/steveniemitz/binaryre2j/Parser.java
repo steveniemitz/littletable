@@ -1,7 +1,9 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/parse.go
 
@@ -9,16 +11,17 @@
 // - Eliminate allocations (new int[], new Regexp[], new ArrayList) by
 //   recycling old arrays on a freelist.
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A parser of regular expression patterns.
  *
  * The only public entry point is {@link #parse(String pattern, int flags)}.
  */
-// CHECKSTYLE:OFF |*
 class Parser {
 
   // Unexpected error
@@ -37,6 +40,7 @@ class Parser {
   private static final String ERR_MISSING_REPEAT_ARGUMENT =
       "missing argument to repetition operator";
   private static final String ERR_TRAILING_BACKSLASH = "trailing backslash at end of expression";
+  private static final String ERR_DUPLICATE_NAMED_CAPTURE = "duplicate capture group name";
 
   // Hack to expose ArrayList.removeRange().
   private static class Stack extends ArrayList<Regexp> {
@@ -55,6 +59,7 @@ class Parser {
   private final Stack stack = new Stack();
   private Regexp free;
   private int numCap = 0; // number of capturing groups seen
+  private final Map<String, Integer> namedGroups = new HashMap<String, Integer>();
 
   Parser(String wholeRegexp, int flags) {
     this.wholeRegexp = wholeRegexp;
@@ -291,24 +296,19 @@ class Parser {
 
   // cleanAlt cleans re for eventual inclusion in an alternation.
   private void cleanAlt(Regexp re) {
-    switch (re.op) {
-      case CHAR_CLASS:
-        re.runes = new CharClass(re.runes).cleanClass().toArray();
-        if (re.runes.length == 2 && re.runes[0] == 0 && re.runes[1] == Unicode.MAX_RUNE) {
-          re.runes = null;
-          re.op = Regexp.Op.ANY_CHAR;
-          return;
-        }
-        if (re.runes.length == 4
-            && re.runes[0] == 0
-            && re.runes[1] == '\n' - 1
-            && re.runes[2] == '\n' + 1
-            && re.runes[3] == Unicode.MAX_RUNE) {
-          re.runes = null;
-          re.op = Regexp.Op.ANY_CHAR_NOT_NL;
-          return;
-        }
-        break;
+    if (re.op == Regexp.Op.CHAR_CLASS) {
+      re.runes = new CharClass(re.runes).cleanClass().toArray();
+      if (re.runes.length == 2 && re.runes[0] == 0 && re.runes[1] == Unicode.MAX_RUNE) {
+        re.runes = null;
+        re.op = Regexp.Op.ANY_CHAR;
+      } else if (re.runes.length == 4
+          && re.runes[0] == 0
+          && re.runes[1] == '\n' - 1
+          && re.runes[2] == '\n' + 1
+          && re.runes[3] == Unicode.MAX_RUNE) {
+        re.runes = null;
+        re.op = Regexp.Op.ANY_CHAR_NOT_NL;
+      }
     }
   }
 
@@ -482,7 +482,12 @@ class Parser {
       Regexp ifirst = null;
       if (i < lensub) {
         ifirst = leadingRegexp(array[s + i]);
-        if (first != null && first.equals(ifirst)) {
+        if (first != null
+            && first.equals(ifirst)
+            && (isCharClass(first)
+                || (first.op == Regexp.Op.REPEAT
+                    && first.min == first.max
+                    && isCharClass(first.subs[0])))) {
           continue;
         }
       }
@@ -905,10 +910,8 @@ class Parser {
                   op(Regexp.Op.NO_WORD_BOUNDARY);
                   break bigswitch;
                 case 'C':
-                  // any byte; not supported
                   op(Regexp.Op.ANY_CHAR);
                   break bigswitch;
-                  //throw new PatternSyntaxException(ERR_INVALID_ESCAPE, "\\C");
                 case 'Q':
                   {
                     // \Q ... \E: the ... is always literals
@@ -919,7 +922,9 @@ class Parser {
                     }
                     t.skipString(lit);
                     t.skipString("\\E");
-                    push(literalRegexp(lit, flags));
+                    for (int j = 0; j < lit.length(); j++) {
+                      literal(lit.charAt(j));
+                    }
                     break bigswitch;
                   }
                 case 'z':
@@ -973,6 +978,7 @@ class Parser {
     if (n != 1) {
       throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp);
     }
+    stack.get(0).namedGroups = namedGroups;
     return stack.get(0);
   }
 
@@ -1063,6 +1069,9 @@ class Parser {
       // Like ordinary capture, but named.
       Regexp re = op(Regexp.Op.LEFT_PAREN);
       re.cap = ++numCap;
+      if (namedGroups.put(name, numCap) != null) {
+        throw new PatternSyntaxException(ERR_DUPLICATE_NAMED_CAPTURE, name);
+      }
       re.name = name;
       return;
     }
@@ -1404,6 +1413,9 @@ class Parser {
 
         // Easy case: two hex digits.
         int x = Utils.unhex(c);
+        if (!t.more()) {
+          break;
+        }
         c = t.pop();
         int y = Utils.unhex(c);
         if (x < 0 || y < 0) {

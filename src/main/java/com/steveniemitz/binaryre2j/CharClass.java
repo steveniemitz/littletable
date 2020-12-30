@@ -1,11 +1,13 @@
-// Copyright 2010 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
+/*
+ * Copyright (c) 2020 The Go Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/parse.go
 
-package vendored.com.google.re2j;
+package com.steveniemitz.binaryre2j;
 
 /**
  * A "builder"-style helper class for manipulating character classes represented as an array of
@@ -13,7 +15,6 @@ package vendored.com.google.re2j;
  *
  * All methods mutate the internal state and return {@code this}, allowing operations to be chained.
  */
-// CHECKSTYLE:OFF |*
 class CharClass {
 
   private int[] r; // inclusive ranges, pairs of [lo,hi].  r.length is even.
