@@ -7,7 +7,7 @@ import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.{Channel, ManagedChannel, Server}
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 import org.scalatest.{BeforeAndAfterEach, Inspectors}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private[littletable] trait BigtableTestSuite extends FunTestSuite with Inspectors with BeforeAndAfterEach {
   implicit class ByteStringTransformer(sc: StringContext) {

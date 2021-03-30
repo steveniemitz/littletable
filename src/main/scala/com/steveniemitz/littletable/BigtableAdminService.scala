@@ -25,7 +25,7 @@ import io.grpc.stub.StreamObserver
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{ConcurrentHashMap, ThreadLocalRandom, TimeUnit}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private object BigtableAdminService {
   private final class ConsistencyState(val tableName: String, numRequestsToConsistent: Int) {

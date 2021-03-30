@@ -1,13 +1,13 @@
 package com.steveniemitz.littletable
 
 import com.google.bigtable.v2.Mutation.MutationCase
-import com.google.bigtable.v2._
+import com.google.bigtable.v2.{Cell => _, Row => _, _}
 import com.google.rpc.Code
 import com.google.protobuf.{ByteString, BytesValue, StringValue}
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
     extends BigtableGrpc.BigtableImplBase {
@@ -49,7 +49,7 @@ final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
     }
   }
 
-  private def mutateRow(table: Table, rowKey: ByteString, mutations: Seq[Mutation]): Unit = {
+  private def mutateRow(table: Table, rowKey: ByteString, mutations: scala.collection.Seq[Mutation]): Unit = {
     val row = table.getOrCreateRow(rowKey)
     row.transact { row =>
       applyMutations(row, mutations)
@@ -57,7 +57,7 @@ final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
     }
   }
 
-  private def applyMutations(row: MutableRow, mutations: Seq[Mutation]): Unit = {
+  private def applyMutations(row: MutableRow, mutations: scala.collection.Seq[Mutation]): Unit = {
     row.transact { row =>
       mutations.foreach { m =>
         m.getMutationCase match {

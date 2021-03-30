@@ -3,7 +3,7 @@ package com.steveniemitz.littletable
 import com.google.common.primitives.UnsignedLongs
 import com.google.protobuf.ByteString
 import java.util
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private sealed trait Row {
   protected type Self <: Row

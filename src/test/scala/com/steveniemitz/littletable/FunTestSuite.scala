@@ -1,10 +1,8 @@
 package com.steveniemitz.littletable
 
-import org.scalatest.{FunSuite, Matchers}
-import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 abstract class FunTestSuite
-  extends FunSuite
-    with GeneratorDrivenPropertyChecks
-    with Checkers
+  extends AnyFunSuite
     with Matchers

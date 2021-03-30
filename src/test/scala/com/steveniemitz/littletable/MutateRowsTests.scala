@@ -376,7 +376,7 @@ class MutateRowsTests extends BigtableTestSuite {
         .addCell("f1", bs"cq1", 1001, bs"value1")
         .addCell("f1", bs"cq1", 1000, bs"value1a")
         .addCell("f2", bs"cq2", 1000, bs"value2")
-        build()
+        .build()
     )
   }
 }

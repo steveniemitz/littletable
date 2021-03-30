@@ -3,7 +3,7 @@ package com.steveniemitz.littletable
 import com.google.protobuf.ByteString
 import java.util.concurrent.{ConcurrentNavigableMap, ConcurrentSkipListMap}
 import java.util.function.{Function => JFunction}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private final class Table(val columnFamilies: Set[String]) {
   private val rows: ConcurrentNavigableMap[ByteString, MutableRow] =

@@ -14,11 +14,13 @@ inThisBuild(List(
 
 name := "littletable"
 
-crossScalaVersions := Seq("2.11.12", "2.12.10")
+crossScalaVersions := Seq("2.11.12", "2.12.10", "2.13.5")
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.5"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.4.3"
 
 libraryDependencies += 
   "com.google.api.grpc" % "grpc-google-cloud-bigtable-admin-v2" % "1.8.0" excludeAll
@@ -30,7 +32,7 @@ libraryDependencies +=
 
 libraryDependencies += "com.google.cloud.bigtable" % "bigtable-client-core" % "1.10.0" % Provided
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.5" % Test
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
 libraryDependencies += "com.google.cloud.bigtable" % "bigtable-client-core" % "1.10.0" % Test
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.7" % Test

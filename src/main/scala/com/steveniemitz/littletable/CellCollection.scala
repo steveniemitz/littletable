@@ -3,7 +3,7 @@ package com.steveniemitz.littletable
 import com.google.common.primitives.UnsignedLongs
 import java.util
 import java.util.Comparator
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 private object CellCollection {
   private object UnsignedLongComparator extends Comparator[Long] {

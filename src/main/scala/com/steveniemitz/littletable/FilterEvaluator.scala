@@ -5,7 +5,7 @@ import com.google.protobuf.ByteString
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom
 import com.steveniemitz.binaryre2j.RE2
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.control.ControlThrowable
 
 private object FilterEvaluator {
@@ -14,7 +14,7 @@ private object FilterEvaluator {
   private final val dropF = drop(RowFilter.getDefaultInstance)
   private final val passF = pass(RowFilter.getDefaultInstance)
 
-  private final case class SinkReturn(row: Row) extends Throwable with ControlThrowable {
+  private final case class SinkReturn(row: Row) extends ControlThrowable {
     override def fillInStackTrace(): Throwable = this
   }
 
