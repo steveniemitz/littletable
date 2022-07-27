@@ -1,6 +1,8 @@
 package com.steveniemitz.littletable
 
-import com.google.bigtable.v2.{ColumnRange, RowFilter, ValueRange}
+import com.google.bigtable.v2.ColumnRange
+import com.google.bigtable.v2.RowFilter
+import com.google.bigtable.v2.ValueRange
 import com.google.protobuf.ByteString
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom

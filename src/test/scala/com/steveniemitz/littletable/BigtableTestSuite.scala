@@ -1,15 +1,24 @@
 package com.steveniemitz.littletable
 
 import com.google.cloud.bigtable.config.BigtableOptions
-import com.google.cloud.bigtable.grpc.{BigtableDataClient, BigtableSession}
+import com.google.cloud.bigtable.grpc.BigtableDataClient
+import com.google.cloud.bigtable.grpc.BigtableSession
 import com.google.protobuf.ByteString
-import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
-import io.grpc.{Channel, ManagedChannel, Server}
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
-import org.scalatest.{BeforeAndAfterEach, Inspectors}
+import io.grpc.inprocess.InProcessChannelBuilder
+import io.grpc.inprocess.InProcessServerBuilder
+import io.grpc.Channel
+import io.grpc.ManagedChannel
+import io.grpc.Server
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.Inspectors
 import scala.jdk.CollectionConverters._
 
-private[littletable] trait BigtableTestSuite extends FunTestSuite with Inspectors with BeforeAndAfterEach {
+private[littletable] trait BigtableTestSuite
+    extends FunTestSuite
+    with Inspectors
+    with BeforeAndAfterEach {
   implicit class ByteStringTransformer(sc: StringContext) {
     def bs(args: Any*): ByteString = ByteString.copyFromUtf8(sc.s(args: _*))
   }

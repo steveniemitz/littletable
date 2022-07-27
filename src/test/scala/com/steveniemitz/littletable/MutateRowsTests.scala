@@ -1,12 +1,14 @@
 package com.steveniemitz.littletable
 
-import com.google.bigtable.v2.{MutateRowRequest, ReadRowsRequest}
+import com.google.bigtable.v2.MutateRowRequest
+import com.google.bigtable.v2.ReadRowsRequest
 import com.google.cloud.bigtable.grpc.scanner.FlatRow
 import com.google.protobuf.ByteString
 
 class MutateRowsTests extends BigtableTestSuite {
   private def readRow(key: ByteString): Option[FlatRow] = {
-    val req = ReadRowsRequest.newBuilder()
+    val req = ReadRowsRequest
+      .newBuilder()
       .setTableName(TestTableName)
     req.getRowsBuilder.addRowKeys(key)
 
@@ -35,7 +37,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", 0, bs"value1")
         .build()
@@ -63,7 +66,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", 1000, bs"value1")
         .build()
@@ -95,7 +99,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", now * 1000, bs"value1")
         .build()
@@ -128,7 +133,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", 0, bs"value1")
         .addCell("f1", bs"cq2", 0, bs"value2")
@@ -205,7 +211,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f2", bs"cq2", 0, bs"value2")
         .build()
@@ -256,7 +263,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1a", 0, bs"value1a")
         .addCell("f2", bs"cq2", 0, bs"value2")
@@ -314,7 +322,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", 1001, bs"value1")
         .addCell("f2", bs"cq2", 1000, bs"value2")
@@ -371,7 +380,8 @@ class MutateRowsTests extends BigtableTestSuite {
 
     val row = maybeRow.get
     row should be(
-      FlatRow.newBuilder()
+      FlatRow
+        .newBuilder()
         .withRowKey(key)
         .addCell("f1", bs"cq1", 1001, bs"value1")
         .addCell("f1", bs"cq1", 1000, bs"value1a")

@@ -2,7 +2,8 @@ package com.steveniemitz.littletable
 
 import com.google.cloud.bigtable.config.BigtableOptions
 import com.google.cloud.bigtable.grpc.BigtableSession
-import io.grpc.{Server, ServerBuilder}
+import io.grpc.Server
+import io.grpc.ServerBuilder
 import io.grpc.inprocess.InProcessServerBuilder
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
@@ -10,10 +11,9 @@ import scala.collection.mutable
 /**
  * An emulator that provides one or more gRPC servers.
  */
-final class BigtableEmulator private(
+final class BigtableEmulator private (
   inProcessServer: Option[(String, Server)],
-  tcpServer: Option[Server]
-) {
+  tcpServer: Option[Server]) {
   val servers: Seq[Server] = Seq(inProcessServer.map(_._2), tcpServer).flatten
 
   private final val serversToStart = mutable.Queue[Server](servers: _*)
@@ -55,7 +55,7 @@ final class BigtableEmulator private(
 }
 
 object BigtableEmulator {
-  final class Builder private[BigtableEmulator]() {
+  final class Builder private[BigtableEmulator] () {
     private val tables = new ConcurrentHashMap[String, Table]()
     private var inProcess: Boolean = true
     private var port: Option[Int] = None

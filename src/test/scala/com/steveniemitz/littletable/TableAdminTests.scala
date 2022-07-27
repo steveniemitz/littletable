@@ -1,10 +1,8 @@
 package com.steveniemitz.littletable
 
-import com.google.bigtable.admin.v2.{
-  BigtableTableAdminGrpc,
-  CheckConsistencyRequest,
-  GenerateConsistencyTokenRequest
-}
+import com.google.bigtable.admin.v2.BigtableTableAdminGrpc
+import com.google.bigtable.admin.v2.CheckConsistencyRequest
+import com.google.bigtable.admin.v2.GenerateConsistencyTokenRequest
 
 class TableAdminTests extends BigtableTestSuite {
   test("creates consistency token") {

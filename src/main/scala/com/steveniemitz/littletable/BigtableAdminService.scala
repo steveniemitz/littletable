@@ -1,22 +1,20 @@
 package com.steveniemitz.littletable
 
 import com.google.bigtable.admin.v2
-import com.google.bigtable.admin.v2.{
-  BigtableTableAdminGrpc,
-  CheckConsistencyRequest,
-  CheckConsistencyResponse,
-  CreateTableRequest,
-  DeleteTableRequest,
-  DropRowRangeRequest,
-  GenerateConsistencyTokenRequest,
-  GenerateConsistencyTokenResponse,
-  GetTableRequest,
-  InstanceName,
-  ListTablesRequest,
-  ListTablesResponse,
-  ColumnFamily => ProtoColumnFamily,
-  Table => ProtoTable
-}
+import com.google.bigtable.admin.v2.BigtableTableAdminGrpc
+import com.google.bigtable.admin.v2.CheckConsistencyRequest
+import com.google.bigtable.admin.v2.CheckConsistencyResponse
+import com.google.bigtable.admin.v2.CreateTableRequest
+import com.google.bigtable.admin.v2.DeleteTableRequest
+import com.google.bigtable.admin.v2.DropRowRangeRequest
+import com.google.bigtable.admin.v2.GenerateConsistencyTokenRequest
+import com.google.bigtable.admin.v2.GenerateConsistencyTokenResponse
+import com.google.bigtable.admin.v2.GetTableRequest
+import com.google.bigtable.admin.v2.InstanceName
+import com.google.bigtable.admin.v2.ListTablesRequest
+import com.google.bigtable.admin.v2.ListTablesResponse
+import com.google.bigtable.admin.v2.{ColumnFamily => ProtoColumnFamily}
+import com.google.bigtable.admin.v2.{Table => ProtoTable}
 import com.google.bigtable.v2.TableName
 import com.google.common.cache.CacheBuilder
 import com.google.protobuf.Empty
@@ -24,7 +22,9 @@ import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.{ConcurrentHashMap, ThreadLocalRandom, TimeUnit}
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit
 import scala.jdk.CollectionConverters._
 
 private object BigtableAdminService {
@@ -41,7 +41,7 @@ private object BigtableAdminService {
 }
 
 class BigtableAdminService(tables: ConcurrentHashMap[String, Table])
-  extends BigtableTableAdminGrpc.BigtableTableAdminImplBase {
+    extends BigtableTableAdminGrpc.BigtableTableAdminImplBase {
 
   import BigtableAdminService._
 

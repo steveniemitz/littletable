@@ -3,7 +3,9 @@ package com.steveniemitz.littletable
 import com.google.bigtable.v2.Mutation.MutationCase
 import com.google.bigtable.v2.{Cell => _, Row => _, _}
 import com.google.rpc.Code
-import com.google.protobuf.{ByteString, BytesValue, StringValue}
+import com.google.protobuf.ByteString
+import com.google.protobuf.BytesValue
+import com.google.protobuf.StringValue
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.util.concurrent.ConcurrentHashMap
@@ -49,7 +51,11 @@ final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
     }
   }
 
-  private def mutateRow(table: Table, rowKey: ByteString, mutations: scala.collection.Seq[Mutation]): Unit = {
+  private def mutateRow(
+    table: Table,
+    rowKey: ByteString,
+    mutations: scala.collection.Seq[Mutation]
+  ): Unit = {
     val row = table.getOrCreateRow(rowKey)
     row.transact { row =>
       applyMutations(row, mutations)

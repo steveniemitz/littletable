@@ -1,7 +1,8 @@
 package com.steveniemitz.littletable
 
 import com.google.protobuf.ByteString
-import java.util.concurrent.{ConcurrentNavigableMap, ConcurrentSkipListMap}
+import java.util.concurrent.ConcurrentNavigableMap
+import java.util.concurrent.ConcurrentSkipListMap
 import java.util.function.{Function => JFunction}
 import scala.jdk.CollectionConverters._
 
@@ -10,9 +11,11 @@ private final class Table(val columnFamilies: Set[String]) {
     new ConcurrentSkipListMap[ByteString, MutableRow](ByteStringComparator)
 
   def getOrCreateRow(key: ByteString): MutableRow =
-    rows.computeIfAbsent(key, new JFunction[ByteString, MutableRow] {
-      override def apply(t: ByteString): MutableRow = MutableRow.create(t)
-    })
+    rows.computeIfAbsent(
+      key,
+      new JFunction[ByteString, MutableRow] {
+        override def apply(t: ByteString): MutableRow = MutableRow.create(t)
+      })
 
   def deleteRow(key: ByteString): Unit = rows.remove(key)
 

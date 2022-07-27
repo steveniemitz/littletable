@@ -1,6 +1,8 @@
 package com.steveniemitz.littletable
 
-import com.google.bigtable.v2.{MutateRowsRequest, Mutation, ReadRowsRequest}
+import com.google.bigtable.v2.MutateRowsRequest
+import com.google.bigtable.v2.Mutation
+import com.google.bigtable.v2.ReadRowsRequest
 import com.google.cloud.bigtable.grpc.scanner.FlatRow
 import com.google.protobuf.ByteString
 
@@ -27,10 +29,14 @@ class ReadRowsTests extends BigtableTestSuite {
     rows.get(0) should be(expected)
   }
 
-  private def cell(family: String, qualifier: ByteString, timestamp: Long, value: ByteString): Mutation = {
+  private def cell(
+    family: String,
+    qualifier: ByteString,
+    timestamp: Long,
+    value: ByteString
+  ): Mutation = {
     val mut = Mutation.newBuilder()
-    mut
-      .getSetCellBuilder
+    mut.getSetCellBuilder
       .setFamilyName(family)
       .setColumnQualifier(qualifier)
       .setTimestampMicros(timestamp)
@@ -39,21 +45,25 @@ class ReadRowsTests extends BigtableTestSuite {
   }
 
   private def insertRows(): Unit = {
-    val req = MutateRowsRequest.newBuilder()
-        .setTableName(TestTableName)
-    req.addEntriesBuilder()
+    val req = MutateRowsRequest
+      .newBuilder()
+      .setTableName(TestTableName)
+    req
+      .addEntriesBuilder()
       .setRowKey(bs"testRow1")
       .addMutations(cell("f1", bs"cq1", 1000, bs"value1"))
       .addMutations(cell("f1", bs"cq2", 1000, bs"value2"))
       .addMutations(cell("f2", bs"cq3", 1000, bs"value3"))
 
-    req.addEntriesBuilder()
+    req
+      .addEntriesBuilder()
       .setRowKey(bs"testRow2")
       .addMutations(cell("f1", bs"cq1", 2000, bs"value10"))
       .addMutations(cell("f1", bs"cq2", 2000, bs"value20"))
       .addMutations(cell("f2", bs"cq3", 2000, bs"value30"))
 
-    req.addEntriesBuilder()
+    req
+      .addEntriesBuilder()
       .setRowKey(bs"testRow4")
       .addMutations(cell("f1", bs"cq1", 3000, bs"value100"))
       .addMutations(cell("f1", bs"cq2", 3000, bs"value200"))
@@ -96,10 +106,12 @@ class ReadRowsTests extends BigtableTestSuite {
     insertRows()
 
     val binaryRowKey = bs('t', 'e', 's', 't', 0xff, 0xff, 'w', '1')
-    val insertReq = MutateRowsRequest.newBuilder()
+    val insertReq = MutateRowsRequest
+      .newBuilder()
       .setTableName(TestTableName)
 
-    insertReq.addEntriesBuilder()
+    insertReq
+      .addEntriesBuilder()
       .setRowKey(binaryRowKey)
       .addMutations(cell("f1", bs"cq1", 4000, bs"value100"))
       .addMutations(cell("f1", bs"cq2", 4000, bs"value200"))
