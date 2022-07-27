@@ -5,6 +5,7 @@ import com.google.bigtable.v2.Mutation
 import com.google.bigtable.v2.ReadRowsRequest
 import com.google.cloud.bigtable.grpc.scanner.FlatRow
 import com.google.protobuf.ByteString
+import io.grpc.StatusRuntimeException
 
 class ReadRowsTests extends BigtableTestSuite {
   test("readRows - key lookup") {
@@ -354,5 +355,37 @@ class ReadRowsTests extends BigtableTestSuite {
 
     val rows = dataClient.readFlatRowsList(req.build())
     rows should have size 3
+  }
+
+  test("readRows - invalid interleave") {
+    insertRows()
+
+    val req = ReadRowsRequest
+      .newBuilder()
+      .setTableName(TestTableName)
+
+    val interleave = req.getFilterBuilder.getInterleaveBuilder
+    interleave.addFiltersBuilder().setCellsPerColumnLimitFilter(1)
+
+    the[StatusRuntimeException] thrownBy {
+      dataClient.readFlatRowsList(req.build())
+    } should have message "INVALID_ARGUMENT: Interleave must contain at least two RowFilters"
+  }
+
+  test("readRows - invalid column range filter") {
+    insertRows()
+
+    val req = ReadRowsRequest
+      .newBuilder()
+      .setTableName(TestTableName)
+
+    val columnRange = req.getFilterBuilder.getColumnRangeFilterBuilder
+    columnRange
+      .setStartQualifierClosed(ByteString.copyFromUtf8("a"))
+      .setEndQualifierOpen(ByteString.copyFromUtf8("b"))
+
+    the[StatusRuntimeException] thrownBy {
+      dataClient.readFlatRowsList(req.build())
+    } should have message "INVALID_ARGUMENT: Error in field 'column_range_filter' : Invalid id for collection columnFamilies : Length should be between [1,64], but found 0"
   }
 }

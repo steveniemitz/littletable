@@ -4,13 +4,19 @@ import com.google.bigtable.v2.ColumnRange
 import com.google.bigtable.v2.RowFilter
 import com.google.bigtable.v2.ValueRange
 import com.google.protobuf.ByteString
+import com.steveniemitz.binaryre2j.RE2
+import io.grpc.Status
+
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ThreadLocalRandom
-import com.steveniemitz.binaryre2j.RE2
 import scala.jdk.CollectionConverters._
 import scala.util.control.ControlThrowable
 
 private object FilterEvaluator {
+  final class InvalidFilterException(msg: String) extends Exception(msg) {
+    def status: Status = Status.INVALID_ARGUMENT.withDescription(msg)
+  }
+
   private def pass(noop: RowFilter): Row => Row = identity[Row]
   private def drop(noop: RowFilter): Row => Row = row => ResultRow.empty(row.key)
   private final val dropF = drop(RowFilter.getDefaultInstance)
@@ -20,7 +26,7 @@ private object FilterEvaluator {
     override def fillInStackTrace(): Throwable = this
   }
 
-  private def prepare(filter: RowFilter): Row => Row = {
+  def prepare(filter: RowFilter): Row => Row = {
     val preparer: RowFilter => Row => Row = filter.getFilterCase match {
       case RowFilter.FilterCase.APPLY_LABEL_TRANSFORMER => prepareApplyLabelTransformer
       case RowFilter.FilterCase.BLOCK_ALL_FILTER => drop
@@ -51,7 +57,7 @@ private object FilterEvaluator {
     rows.flatMap { r => evaluate(r, evalFn) }
   }
 
-  private def evaluate(row: Row, evalFn: Row => Row): Option[Row] = {
+  def evaluate(row: Row, evalFn: Row => Row): Option[Row] = {
     row.transact { r =>
       val newRow =
         try evalFn(r)
@@ -93,6 +99,9 @@ private object FilterEvaluator {
 
   private def prepareRowInterleave(filter: RowFilter): Row => Row = {
     val interleave = filter.getInterleave
+    if (interleave.getFiltersCount < 2) {
+      throw new InvalidFilterException("Interleave must contain at least two RowFilters")
+    }
     val filterFns = interleave.getFiltersList.asScala.map(prepare)
 
     row => {
@@ -109,6 +118,12 @@ private object FilterEvaluator {
   private def prepareColumnRangeFilter(filter: RowFilter): Row => Row = {
     val cr = filter.getColumnRangeFilter
     val familyMatch = cr.getFamilyName
+    if (familyMatch.length > 64 || familyMatch.length < 1) {
+      throw new InvalidFilterException(
+        "Error in field 'column_range_filter' : Invalid id for collection columnFamilies : " +
+          s"Length should be between [1,64], but found ${familyMatch.length}")
+    }
+
     val (startCol, startColInclusive) = cr.getStartQualifierCase match {
       case ColumnRange.StartQualifierCase.START_QUALIFIER_CLOSED =>
         Some(cr.getStartQualifierClosed) -> true

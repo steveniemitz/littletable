@@ -2,14 +2,19 @@ package com.steveniemitz.littletable
 
 import com.google.bigtable.v2.Mutation.MutationCase
 import com.google.bigtable.v2.{Cell => _, Row => _, _}
-import com.google.rpc.Code
 import com.google.protobuf.ByteString
 import com.google.protobuf.BytesValue
 import com.google.protobuf.StringValue
+import com.google.rpc.Code
+import com.steveniemitz.littletable.FilterEvaluator.InvalidFilterException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
+
 import java.util.concurrent.ConcurrentHashMap
 import scala.jdk.CollectionConverters._
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
     extends BigtableGrpc.BigtableImplBase {
@@ -139,11 +144,17 @@ final class BigtableDataService(tables: ConcurrentHashMap[String, Table])
       deduppedRows.values().asScala
     }
 
-    val filteredRows = FilterEvaluator.evaluate(rowsToFilter.iterator, request.getFilter)
+    val response =
+      Try(FilterEvaluator.evaluate(rowsToFilter.iterator, request.getFilter)).map(processRows)
 
-    val response = processRows(filteredRows)
-    responseObserver.onNext(response)
-    responseObserver.onCompleted()
+    response match {
+      case Success(value) =>
+        responseObserver.onNext(value)
+        responseObserver.onCompleted()
+      case Failure(ex: InvalidFilterException) =>
+        responseObserver.onError(ex.status.asRuntimeException())
+      case Failure(ex) => responseObserver.onError(ex)
+    }
   }
 
   private def processRows(rows: Iterator[Row]): ReadRowsResponse = {
